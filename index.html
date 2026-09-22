@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>GTM Roulette — The Worst Product Wins</title>
+<meta name="description" content="Spin three wheels to generate a product, a buyer and a bizarre twist. Pitch it in 60 seconds.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Top ticker -->
+<div class="ticker ticker-top" aria-hidden="true">
+  <div class="ticker-track">
+    <span class="ticker-set">
+      <span>NO REFUNDS</span><span>•</span>
+      <span>NO REGRETS</span><span>•</span>
+      <span>SPIN RESPONSIBLY</span><span>•</span>
+      <span>VIBES-BASED TARGETING</span><span>•</span>
+      <span>BURN RATE: HEALTHY-ISH</span><span>•</span>
+      <span>PIVOT PENDING</span><span>•</span>
+      <span>TOTALLY SCALABLE</span><span>•</span>
+      <span>SLIDES NOT INCLUDED</span><span>•</span>
+    </span>
+    <span class="ticker-set">
+      <span>NO REFUNDS</span><span>•</span>
+      <span>NO REGRETS</span><span>•</span>
+      <span>SPIN RESPONSIBLY</span><span>•</span>
+      <span>VIBES-BASED TARGETING</span><span>•</span>
+      <span>BURN RATE: HEALTHY-ISH</span><span>•</span>
+      <span>PIVOT PENDING</span><span>•</span>
+      <span>TOTALLY SCALABLE</span><span>•</span>
+      <span>SLIDES NOT INCLUDED</span><span>•</span>
+    </span>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <header class="header">
+    <div class="brand">🎰 GTM ROULETTE</div>
+    <p class="kicker">○ TEAMS VS. THE MARKET</p>
+    <h1>The <mark>Worst</mark> Product Wins</h1>
+    <p class="lede">Spin three wheels. Get a product, a buyer, and a constraint that shouldn't exist. Pitch it anyway.</p>
+  </header>
+
+  <!-- STEP 1: Team name -->
+  <section id="teamSection" class="card team-card">
+    <label for="teamNameInput" class="card-label">Team name</label>
+    <div class="team-row">
+      <input id="teamNameInput" type="text" maxlength="30" placeholder="e.g. Chaos Coalition" autocomplete="off">
+      <button id="saveTeamBtn" class="btn btn-dark">Lock in</button>
+    </div>
+    <p class="team-hint">One person types it in. Your team gets <strong>one spin</strong> — then this phone locks for good.</p>
+  </section>
+
+  <!-- Active team banner (shown once set) -->
+  <div id="teamBanner" class="team-banner hidden">
+    <span class="team-banner-dot"></span>
+    Playing as <strong id="teamBannerName"></strong>
+    <button id="editTeamBtn" class="link-btn">edit</button>
+  </div>
+
+  <!-- STEP 2: Wheels -->
+  <section class="wheels">
+    <div class="wheel-card" data-cat="product">
+      <span class="chip">PITCH THIS</span>
+      <div class="wheel-value" id="productValue">???</div>
+    </div>
+    <div class="flow-arrow" aria-hidden="true">↓</div>
+    <div class="wheel-card" data-cat="buyer">
+      <span class="chip">TO</span>
+      <div class="wheel-value" id="buyerValue">???</div>
+    </div>
+    <div class="flow-arrow" aria-hidden="true">↓</div>
+    <div class="wheel-card" data-cat="twist">
+      <span class="chip">BUT</span>
+      <div class="wheel-value" id="twistValue">???</div>
+    </div>
+  </section>
+
+  <button id="spinBtn" class="btn btn-spin" disabled>
+    <span id="spinBtnLabel">🎲 SPIN THE ROULETTE</span>
+  </button>
+
+  <p id="lockedNote" class="locked-note hidden">
+    🔒 Locked in — one spin per team, no take-backs.
+  </p>
+
+  <!-- STEP 3: What to do next -->
+  <section id="nextSteps" class="card next-steps hidden">
+    <h2>Now go pitch it</h2>
+    <ol>
+      <li><span class="num">1</span><div><strong>10 minutes</strong> to prep a <strong>60-second pitch</strong>.</div></li>
+      <li><span class="num">2</span><div>Record a video of your pitch.</div></li>
+      <li><span class="num">3</span><div>Send it to the <strong>WhatsApp group</strong>.</div></li>
+    </ol>
+  </section>
+
+  <footer class="footer">
+    <button id="resetBtn" class="link-btn subtle">Reset this device (new team)</button>
+  </footer>
+
+</main>
+
+<!-- Bottom ticker -->
+<div class="ticker ticker-bottom" aria-hidden="true">
+  <div class="ticker-track">
+    <span class="ticker-set">
+      <span>ONE SPIN PER TEAM</span><span>▲</span>
+      <span>NO TAKE-BACKS</span><span>●</span>
+      <span>60 SECONDS ON THE CLOCK</span><span>▲</span>
+      <span>WHATSAPP THE VIDEO</span><span>●</span>
+      <span>MAY THE WORST PRODUCT WIN</span><span>▲</span>
+    </span>
+    <span class="ticker-set">
+      <span>ONE SPIN PER TEAM</span><span>▲</span>
+      <span>NO TAKE-BACKS</span><span>●</span>
+      <span>60 SECONDS ON THE CLOCK</span><span>▲</span>
+      <span>WHATSAPP THE VIDEO</span><span>●</span>
+      <span>MAY THE WORST PRODUCT WIN</span><span>▲</span>
+    </span>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
