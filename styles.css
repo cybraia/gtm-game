@@ -131,6 +131,22 @@ h1, h2 { font-family: 'Archivo Black', 'Space Grotesk', sans-serif; }
   font-weight:500;
 }
 
+.lede strong{ color: var(--ink); }
+
+.prize{
+  display:inline-block;
+  font-family:'Archivo Black', 'Space Grotesk', sans-serif;
+  font-size: 24px;
+  background: var(--lime);
+  color: var(--ink);
+  border: 3px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 16px;
+  margin-bottom: 14px;
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: rotate(-1.5deg);
+}
+
 .meta-row{
   display:flex;
   gap:8px;
@@ -180,7 +196,7 @@ h1, h2 { font-family: 'Archivo Black', 'Space Grotesk', sans-serif; }
 
 .team-row{ display:flex; gap:8px; }
 
-#teamNameInput{
+.text-input{
   flex:1;
   min-width:0;
   background: var(--cream);
@@ -193,8 +209,8 @@ h1, h2 { font-family: 'Archivo Black', 'Space Grotesk', sans-serif; }
   font-weight:600;
   outline:none;
 }
-#teamNameInput::placeholder{ color: #9a9585; }
-#teamNameInput:focus{ background: #fff; }
+.text-input::placeholder{ color: #9a9585; }
+.text-input:focus{ background: #fff; }
 
 .team-hint{
   color: var(--ink-soft);
@@ -405,6 +421,44 @@ h1, h2 { font-family: 'Archivo Black', 'Space Grotesk', sans-serif; }
   margin-top: 1px;
 }
 .next-steps strong{ color: var(--ink); }
+
+/* How to play */
+.how-to{ transform: rotate(-0.4deg); }
+.how-to .how-sub{ margin: 22px 0 8px; font-size: 16px; }
+.criteria{
+  margin: 0;
+  font-family:'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+/* Host panel + mode banner */
+.host-panel{ margin-bottom: 18px; }
+.host-status{ margin: 0 0 12px; }
+.host-row{ margin: 14px 0 6px; }
+.host-row .btn-dark{ background: var(--coral); color: var(--ink); }
+.btn-host{
+  width:100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  background: var(--blue);
+  color: #fff;
+}
+.mode-banner{
+  text-align:center;
+  font-family:'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin: 0 0 18px;
+  border: 2.5px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 14px;
+  background: var(--coral);
+  color: var(--ink);
+}
+.mode-banner.test{ background: var(--blue); color: #fff; }
 
 .disclaimer{
   text-align:center;
