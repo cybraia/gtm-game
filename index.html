@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>GTM Roulette — The Worst Product Wins</title>
-<meta name="description" content="Spin three wheels to generate a product, a buyer and a bizarre twist. Pitch it in 60 seconds.">
+<meta name="description" content="One spin. One ridiculous product. One unsuspecting buyer. One impossible GTM twist. Pitch it in 30 seconds.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,20 +42,47 @@
 <main class="wrap">
 
   <header class="header">
-    <div class="brand">🎰 GTM ROULETTE</div>
+    <div class="brand">🎰 GTM MARATHON</div>
     <p class="kicker">○ TEAMS VS. THE MARKET</p>
-    <h1>The <mark>Worst</mark> Product Wins</h1>
-    <p class="lede">Spin three wheels. Get a product, a buyer, and a constraint that shouldn't exist. Pitch it anyway.</p>
+    <h1>The <mark>Worst</mark> Product Wins.</h1>
+    <p class="lede"><strong>Can you sell something nobody asked for?</strong></p>
+    <p class="lede">One spin. One ridiculous product. One unsuspecting buyer. One impossible GTM twist.<br>You've got 10 minutes to make it sell.</p>
+    <div class="prize">WIN ₹3,000 CASH</div>
+    <div class="meta-row">
+      <span class="pill">Teams of 3</span>
+      <span class="pill">One spin per team</span>
+      <span class="pill">30-second pitch</span>
+    </div>
   </header>
+
+  <!-- Host-only panel (open with ?host in the URL) -->
+  <section id="hostPanel" class="card host-panel hidden">
+    <span class="card-label">Host controls</span>
+    <div id="hostLogin" class="team-row">
+      <input id="hostKeyInput" class="text-input" type="password" placeholder="Host key" autocomplete="off">
+      <button id="hostLoginBtn" class="btn btn-dark">Unlock</button>
+    </div>
+    <div id="hostTools" class="hidden">
+      <p id="hostStatus" class="team-hint host-status"></p>
+      <button id="testModeBtn" class="btn btn-host">Start test mode</button>
+      <div class="team-row host-row">
+        <input id="resetTeamInput" class="text-input" type="text" maxlength="30" placeholder="Team name to reset" autocomplete="off">
+        <button id="resetTeamBtn" class="btn btn-dark">Reset</button>
+      </div>
+      <button id="resetAllBtn" class="link-btn">Reset ALL teams</button>
+    </div>
+  </section>
+
+  <p id="modeBanner" class="mode-banner hidden"></p>
 
   <!-- STEP 1: Team name -->
   <section id="teamSection" class="card team-card">
     <label for="teamNameInput" class="card-label">Team name</label>
     <div class="team-row">
-      <input id="teamNameInput" type="text" maxlength="30" placeholder="e.g. Chaos Coalition" autocomplete="off">
+      <input id="teamNameInput" class="text-input" type="text" maxlength="30" placeholder="e.g. Chaos Coalition" autocomplete="off">
       <button id="saveTeamBtn" class="btn btn-dark">Lock in</button>
     </div>
-    <p class="team-hint">One person types it in. Your team gets <strong>one spin</strong> — then this phone locks for good.</p>
+    <p class="team-hint">Use exactly the same team name you posted in the event WhatsApp group. Your team gets <strong>one spin</strong> — on any device.</p>
   </section>
 
   <!-- Active team banner (shown once set) -->
@@ -88,18 +115,35 @@
   </button>
 
   <p id="lockedNote" class="locked-note hidden">
-    🔒 Locked in — one spin per team, no take-backs.
+    🔒 LOCKED IN — One spin per team. No take-backs.
   </p>
 
   <!-- STEP 3: What to do next -->
   <section id="nextSteps" class="card next-steps hidden">
-    <h2>Now go pitch it</h2>
+    <h2>Now go pitch it!</h2>
     <ol>
-      <li><span class="num">1</span><div><strong>10 minutes</strong> to prep a <strong>60-second pitch</strong>.</div></li>
-      <li><span class="num">2</span><div>Record a video of your pitch.</div></li>
-      <li><span class="num">3</span><div>Send it to the <strong>WhatsApp group</strong>.</div></li>
+      <li><span class="num">1</span><div><strong>10 minutes</strong> to prepare.</div></li>
+      <li><span class="num">2</span><div>Record a <strong>30-second pitch</strong>.</div></li>
+      <li><span class="num">3</span><div>Post your video with your team name in the <strong>event WhatsApp group</strong> before <strong>11:59 PM IST</strong>.</div></li>
     </ol>
   </section>
+
+  <!-- How to play -->
+  <section class="card next-steps how-to">
+    <h2>How to play</h2>
+    <ol>
+      <li><span class="num">1</span><div><strong>Form your team.</strong> Create a team of exactly three people. Choose a team name and post it, along with the full names of all three members, in the event WhatsApp group.</div></li>
+      <li><span class="num">2</span><div><strong>Enter your team name.</strong> Enter exactly the same team name on this website before spinning.</div></li>
+      <li><span class="num">3</span><div><strong>Spin once.</strong> Get one product, one buyer and one GTM twist. One spin per team. No take-backs.</div></li>
+      <li><span class="num">4</span><div><strong>Prepare your pitch.</strong> You have 10 minutes to prepare a 30-second pitch. Sell your product to your assigned buyer while respecting your twist.</div></li>
+      <li><span class="num">5</span><div><strong>Record and submit.</strong> Record your 30-second pitch and post it in the event WhatsApp group with your team name by 11:59 PM IST on Saturday, 26 September 2026.</div></li>
+      <li><span class="num">6</span><div><strong>Win ₹3,000 cash.</strong> One winning team receives ₹3,000 in total. The host, mentors and game team will review submissions. The panel's decision is final. The winner will be announced after the event.</div></li>
+    </ol>
+    <h2 class="how-sub">What the panel looks for</h2>
+    <p class="criteria">Buyer understanding · Clever positioning · GTM creativity · Entertainment</p>
+  </section>
+
+  <p class="disclaimer">Only the first eligible submission per team will be judged. Submitted videos will be available to the judging panel. Obtain separate permission before publicly reposting any video.</p>
 
   <footer class="footer">
     <button id="resetBtn" class="link-btn subtle">Reset this device (new team)</button>
@@ -113,14 +157,14 @@
     <span class="ticker-set">
       <span>ONE SPIN PER TEAM</span><span>▲</span>
       <span>NO TAKE-BACKS</span><span>●</span>
-      <span>60 SECONDS ON THE CLOCK</span><span>▲</span>
+      <span>30 SECONDS ON THE CLOCK</span><span>▲</span>
       <span>WHATSAPP THE VIDEO</span><span>●</span>
       <span>MAY THE WORST PRODUCT WIN</span><span>▲</span>
     </span>
     <span class="ticker-set">
       <span>ONE SPIN PER TEAM</span><span>▲</span>
       <span>NO TAKE-BACKS</span><span>●</span>
-      <span>60 SECONDS ON THE CLOCK</span><span>▲</span>
+      <span>30 SECONDS ON THE CLOCK</span><span>▲</span>
       <span>WHATSAPP THE VIDEO</span><span>●</span>
       <span>MAY THE WORST PRODUCT WIN</span><span>▲</span>
     </span>

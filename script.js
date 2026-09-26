@@ -1,156 +1,25 @@
 (function () {
   "use strict";
 
-  // ---------- Content decks (inspired by "Cards Against Startups") ----------
+  // ---------- Decks ----------
+  // The server owns the decks and the matching logic. The browser only gets
+  // text lists (no categories) for the reel animation.
 
-  const PRODUCTS = [
-    "AI-powered office chair that files its own HR complaints",
-    "Blockchain toaster with a 40-page whitepaper",
-    "Subscription box for artisanal paperclips, Series A pending",
-    "IoT dog leash with a longer privacy policy than the dog's insurance",
-    "NFT marketplace for parking spots nobody owns",
-    "Social network exclusively for houseplants, now with read receipts",
-    "Uber, but for lawnmowers, minus the lawnmowers",
-    "AI chatbot for goldfish with zero customer retention",
-    "Smart mirror that judges your outfit and your life choices",
-    "Crypto wallet for pigeons, audited by pigeons",
-    "VR headset for naps, pitched internally as \"deep work\"",
-    "Subscription box for mystery rocks, no refunds, no rocks",
-    "AI-generated grocery lists nobody asked for",
-    "Blockchain-verified handshakes, still zero customers",
-    "Drone delivery for participation trophies",
-    "Smart fridge that live-tweets your snacking",
-    "AI elevator-music curator with a Series A and no elevators",
-    "Wearable that tracks eye rolls during stand-up",
-    "Voice assistant for houseplants that mostly just sighs",
-    "Robotic pooper-scooper with a public roadmap",
-    "Meditation app designed for extroverts",
-    "Subscription razor blades for pets, cancelled by the pets",
-    "AI-powered napkin folder, enterprise tier",
-    "Smart doorbell that never actually opens the door",
-    "Gamified tax-filing app with a leaderboard",
-    "Peer-to-peer parking-meter sharing, pre-regulation",
-    "AI sommelier for gas station wine",
-    "Smart umbrella that shows you ads mid-downpour",
-    "Wearable posture corrector for cats",
-    "Punch-card loyalty app for funerals",
-    "AI fortune cookies with dynamic, surge-priced fortunes",
-    "Subscription plan for other people's Wi-Fi passwords",
-    "Smart trash can that livestreams its own contents",
-    "A to-do list on the blockchain, zero items completed",
-    "AI life coach for houseplants",
-    "Self-driving shopping cart with separation anxiety",
-    "Wearable that translates baby cries into Jira tickets",
-    "AI small-talk generator for elevators",
-    "Subscription box for gently used birthday candles",
-    "Smart pillow that reports your dreams to HR",
-    "ChatGPT wrapper for wedding vows, white-labeled",
-    "Enterprise SaaS for scheduling other SaaS meetings",
-    "Vibe-coded firmware for a pacemaker",
-    "Blockchain loyalty points that only redeem for jury duty",
-    "An AI agent that negotiates your rent via strongly worded emails",
-    "A pivot table wearing a product roadmap",
-  ];
+  let PRODUCTS = [];
+  let BUYERS = [];
+  let TWISTS = [];
 
-  const BUYERS = [
-    "Hospital administrators who still fax",
-    "Kindergarten teachers with zero patience left for pivots",
-    "Cruise ship captains between icebergs",
-    "Funeral home directors chasing \"growth\"",
-    "Prison wardens with an innovation budget",
-    "Michelin-star chefs who just discovered SaaS",
-    "Long-haul truckers with strong opinions on UX",
-    "Off-grid homesteaders shopping on one bar of signal",
-    "NASA astronauts filling out an expense report",
-    "Professional wrestlers reading the terms of service",
-    "Retired librarians who still believe in due diligence",
-    "Wedding planners three vendors deep in a crisis",
-    "Reformed cult leaders, now \"thought leaders\"",
-    "Substitute teachers subbing in as your beta testers",
-    "Airport security agents who confiscate your demo unit",
-    "Competitive eaters evaluating your unit economics",
-    "Golf course groundskeepers with a Series A relative",
-    "Submarine crews with famously bad Wi-Fi",
-    "Beekeepers who take \"hive mind\" personally",
-    "Monastery residents on a vow of no upsells",
-    "VCs in between funds, extremely available",
-    "DMV employees rating your customer experience",
-    "Zoo veterinarians who've seen worse pitches",
-    "Air traffic controllers multitasking through your demo",
-    "Door-to-door salespeople judging your close",
-    "Professional mascots who can't remove the costume for this",
-    "Casino pit bosses who spot a bluff instantly",
-    "Lighthouse keepers, your only repeat customers",
-    "Volunteer firefighters who show up anyway",
-    "HOA presidents with a laminator and a grudge",
-    "Crossing guards blocking your go-to-market",
-    "Competitive cheese connoisseurs, surprisingly litigious",
-    "Amusement park ride operators who've heard every pitch",
-    "Competitive chess hustlers three moves ahead of your roadmap",
-    "A retired astronauts' book club, mid-argument",
-    "Night-shift bus drivers, your most loyal power users",
-    "Escape room designers who built in an exit for this",
-    "Search-and-rescue dog handlers, easily distracted",
-    "Wedding DJs who only take requests via Slack",
-    "Interstate rest-stop managers, chronically understaffed",
-    "Middle management at a paperclip factory, mid-reorg",
-    "Series A investors who just discovered TikTok",
-    "Amish elders evaluating a Wi-Fi router",
-    "Gate agents mid storm-delay, fresh out of patience",
-    "Mall Santa contractors, seasonal but skeptical",
-    "Timeshare sales trainers, impressed against their will",
-    "IT admins who still run everything through a fax machine",
-    "HR at a company with no HR",
-  ];
-
-  const TWISTS = [
-    "7 days to get customers, starting yesterday",
-    "Your only marketing channel is fax machines",
-    "Banned from saying \"innovative\"",
-    "Your team can only communicate in emojis",
-    "No screens allowed during the pitch",
-    "Product ships exclusively door-to-door",
-    "Regulators just banned all online advertising",
-    "Your entire budget is $27, non-negotiable",
-    "Your CEO insists the pitch include a jingle",
-    "Customer acquisition is limited to carrier pigeon",
-    "Your target market actively distrusts technology",
-    "You must pivot the idea halfway through the pitch",
-    "A competitor just went viral for the opposite idea",
-    "You are not allowed to mention the price, ever",
-    "Your investor demands profitability by Friday",
-    "Slides deleted five minutes ago, no backup",
-    "The pitch must be delivered entirely in rhyme",
-    "Analog channels only: print and radio",
-    "Your target customer already filed a restraining order against your industry",
-    "You must whisper the entire pitch",
-    "Only your quietest teammate is allowed to speak",
-    "The product must be pitched as a children's toy",
-    "Deals can only close via handwritten letter",
-    "Your team must pitch standing on one leg",
-    "The pitch must end with a call-to-action to a landline",
-    "The product must be positioned as $10,000 luxury, no exceptions",
-    "You must convince investors this is actually a nonprofit",
-    "The entire GTM plan must fit on one sticky note",
-    "Your launch event is a gas station at 3am",
-    "You can only advertise via newspaper classifieds",
-    "Your board just replaced \"growth\" with \"vibes\" as the north star",
-    "A competitor is giving your exact product away for free",
-    "Your only case study is your own mother",
-    "You must say \"blockchain\" at least three times",
-    "Your app store rating is one star, from your cofounder",
-    "The pitch must double as a wedding toast",
-    "Legal just froze the word \"AI\" in all your marketing",
-    "You must close the deal before the elevator hits the lobby",
-    "Your only proof of demand is a group chat poll",
-  ];
-
-  // ---------- State ----------
+  // "server": spins are made and saved by server.js (one spin per team, any device).
+  // "local":  no game server reachable (static hosting). Spins are saved on this
+  //           device only, and the page says so.
+  let mode = null;
+  let localDecks = null;
 
   const STORAGE_KEYS = {
     team: "gtmRoulette_teamName",
-    result: "gtmRoulette_result",
-    locked: "gtmRoulette_locked",
+    localResults: "gtmRoulette_localResults",
+    hostKey: "gtmRoulette_hostKey",
+    testMode: "gtmRoulette_testMode",
   };
 
   const els = {
@@ -168,6 +37,17 @@
     productValue: document.getElementById("productValue"),
     buyerValue: document.getElementById("buyerValue"),
     twistValue: document.getElementById("twistValue"),
+    modeBanner: document.getElementById("modeBanner"),
+    hostPanel: document.getElementById("hostPanel"),
+    hostLogin: document.getElementById("hostLogin"),
+    hostKeyInput: document.getElementById("hostKeyInput"),
+    hostLoginBtn: document.getElementById("hostLoginBtn"),
+    hostTools: document.getElementById("hostTools"),
+    hostStatus: document.getElementById("hostStatus"),
+    testModeBtn: document.getElementById("testModeBtn"),
+    resetTeamInput: document.getElementById("resetTeamInput"),
+    resetTeamBtn: document.getElementById("resetTeamBtn"),
+    resetAllBtn: document.getElementById("resetAllBtn"),
   };
 
   const wheelCards = {
@@ -180,33 +60,163 @@
     return list[Math.floor(Math.random() * list.length)];
   }
 
-  function getTeamName() {
-    return localStorage.getItem(STORAGE_KEYS.team) || "";
+  // Same rule as the server: case-insensitive, ignores leading/trailing whitespace.
+  function teamKey(name) {
+    return name.normalize("NFKC").trim().toLowerCase();
   }
 
-  function isLocked() {
-    return localStorage.getItem(STORAGE_KEYS.locked) === "1";
-  }
-
-  function getSavedResult() {
-    const raw = localStorage.getItem(STORAGE_KEYS.result);
-    if (!raw) return null;
+  // Storage can throw (private mode, blocked site data); never let it break the game.
+  function store(area, key, value) {
     try {
-      return JSON.parse(raw);
+      if (value === null) area.removeItem(key);
+      else area.setItem(key, value);
+    } catch (e) {}
+  }
+  function load(area, key) {
+    try {
+      return area.getItem(key);
     } catch (e) {
       return null;
     }
   }
 
+  function getTeamName() {
+    return load(localStorage, STORAGE_KEYS.team) || "";
+  }
+
+  // The current team's saved result (from the server, or this device in local mode).
+  let currentResult = null;
+
+  function isLocked() {
+    return !!currentResult;
+  }
+
+  function getHostKey() {
+    return load(sessionStorage, STORAGE_KEYS.hostKey) || "";
+  }
+
+  function isTestMode() {
+    return load(sessionStorage, STORAGE_KEYS.testMode) === "1";
+  }
+
+  // ---------- Server / local backends ----------
+
+  async function api(path, options) {
+    const opts = Object.assign({ headers: {} }, options);
+    opts.headers["Content-Type"] = "application/json";
+    const key = getHostKey();
+    if (key) opts.headers["X-Host-Key"] = key;
+    const res = await fetch("api/" + path, opts);
+    let body = null;
+    try {
+      body = await res.json();
+    } catch (e) {}
+    if (!res.ok) throw new Error((body && body.error) || "Something went wrong. Try again.");
+    return body;
+  }
+
+  function getLocalResults() {
+    try {
+      return JSON.parse(load(localStorage, STORAGE_KEYS.localResults)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function setLocalResults(results) {
+    store(localStorage, STORAGE_KEYS.localResults, JSON.stringify(results));
+  }
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const tag = document.createElement("script");
+      tag.src = src;
+      tag.onload = resolve;
+      tag.onerror = reject;
+      document.head.appendChild(tag);
+    });
+  }
+
+  async function detectMode() {
+    try {
+      const d = await api("decks");
+      PRODUCTS = d.products;
+      BUYERS = d.buyers;
+      TWISTS = d.twists;
+      mode = "server";
+    } catch (e) {
+      await loadScript("decks.js");
+      localDecks = window.GTM_DECKS;
+      const d = localDecks.publicDecks();
+      PRODUCTS = d.products;
+      BUYERS = d.buyers;
+      TWISTS = d.twists;
+      mode = "local";
+    }
+  }
+
+  async function lookupTeam(name) {
+    if (mode === "server") {
+      const r = await api("team?name=" + encodeURIComponent(name));
+      return r.spun ? r.result : null;
+    }
+    return getLocalResults()[teamKey(name)] || null;
+  }
+
+  // Returns { result, alreadySpun }.
+  async function requestSpin(name, test) {
+    if (mode === "server") {
+      return api("spin", { method: "POST", body: JSON.stringify(test ? { test: true } : { teamName: name }) });
+    }
+    if (test) return { result: localDecks.spin(), alreadySpun: false };
+    const results = getLocalResults();
+    const key = teamKey(name);
+    if (results[key]) return { result: results[key], alreadySpun: true };
+    const result = Object.assign({ teamName: name }, localDecks.spin());
+    results[key] = result;
+    setLocalResults(results);
+    return { result, alreadySpun: false };
+  }
+
   // ---------- UI rendering ----------
 
+  function renderModeBanner() {
+    els.modeBanner.classList.remove("test");
+    if (isTestMode()) {
+      els.modeBanner.textContent = "🧪 HOST TEST MODE — spins are not saved and don't use up any team's spin.";
+      els.modeBanner.classList.add("test");
+      els.modeBanner.classList.remove("hidden");
+    } else if (mode === "local") {
+      els.modeBanner.textContent = "⚠ Game server not connected. Spins are saved on this device only, so one spin per team can't be enforced across devices.";
+      els.modeBanner.classList.remove("hidden");
+    } else {
+      els.modeBanner.classList.add("hidden");
+    }
+  }
+
+  function clearWheels() {
+    els.productValue.textContent = "???";
+    els.buyerValue.textContent = "???";
+    els.twistValue.textContent = "???";
+    Object.values(wheelCards).forEach((c) => c.classList.remove("settled", "spinning"));
+    els.spinBtnLabel.textContent = "🎲 SPIN THE ROULETTE";
+    els.lockedNote.classList.add("hidden");
+    els.nextSteps.classList.add("hidden");
+  }
+
   function renderTeamUI() {
+    if (isTestMode()) {
+      els.teamSection.classList.add("hidden");
+      els.teamBanner.classList.add("hidden");
+      els.spinBtn.disabled = spinning;
+      return;
+    }
     const name = getTeamName();
     if (name) {
       els.teamSection.classList.add("hidden");
       els.teamBanner.classList.remove("hidden");
       els.teamBannerName.textContent = name;
-      els.spinBtn.disabled = isLocked();
+      els.spinBtn.disabled = isLocked() || !mode;
     } else {
       els.teamSection.classList.remove("hidden");
       els.teamBanner.classList.add("hidden");
@@ -215,7 +225,7 @@
   }
 
   function renderLockedResult() {
-    const result = getSavedResult();
+    const result = currentResult;
     if (!result) return;
     els.productValue.textContent = result.product;
     els.buyerValue.textContent = result.buyer;
@@ -294,38 +304,80 @@
   }
 
   async function doSpin() {
-    if (spinning || isLocked() || !getTeamName()) return;
+    const test = isTestMode();
+    const name = getTeamName();
+    if (spinning || !mode || (!test && (isLocked() || !name))) return;
     spinning = true;
     els.spinBtn.disabled = true;
     els.spinBtnLabel.textContent = "🎰 SPINNING...";
+    els.lockedNote.classList.add("hidden");
+    els.nextSteps.classList.add("hidden");
 
     Object.values(wheelCards).forEach((c) => c.classList.remove("settled"));
 
-    const finalProduct = pickRandom(PRODUCTS);
-    const finalBuyer = pickRandom(BUYERS);
-    const finalTwist = pickRandom(TWISTS);
+    let response;
+    try {
+      response = await requestSpin(name, test);
+    } catch (e) {
+      spinning = false;
+      els.spinBtnLabel.textContent = "🎲 SPIN THE ROULETTE";
+      renderTeamUI();
+      alert(e.message || "Couldn't reach the game. Check your connection and try again.");
+      return;
+    }
+
+    const result = response.result;
+
+    // Another device already spun for this team: show the saved combination, no re-spin.
+    if (response.alreadySpun) {
+      spinning = false;
+      currentResult = result;
+      renderLockedResult();
+      alert(`"${result.teamName}" has already spun. Here's your team's combination.`);
+      return;
+    }
 
     await Promise.all([
-      spinReel(els.productValue, wheelCards.product, PRODUCTS, 1400, finalProduct),
-      spinReel(els.buyerValue, wheelCards.buyer, BUYERS, 1900, finalBuyer),
-      spinReel(els.twistValue, wheelCards.twist, TWISTS, 2400, finalTwist),
+      spinReel(els.productValue, wheelCards.product, PRODUCTS, 1400, result.product),
+      spinReel(els.buyerValue, wheelCards.buyer, BUYERS, 1900, result.buyer),
+      spinReel(els.twistValue, wheelCards.twist, TWISTS, 2400, result.twist),
     ]);
 
-    const result = { product: finalProduct, buyer: finalBuyer, twist: finalTwist };
-    localStorage.setItem(STORAGE_KEYS.result, JSON.stringify(result));
-    localStorage.setItem(STORAGE_KEYS.locked, "1");
-
     spinning = false;
+    launchConfetti();
+
+    if (test) {
+      els.spinBtnLabel.textContent = "🧪 TEST SPIN AGAIN";
+      els.spinBtn.disabled = false;
+      return;
+    }
+
+    currentResult = result;
     els.spinBtnLabel.textContent = "🔒 ALREADY SPUN";
     els.lockedNote.classList.remove("hidden");
     els.nextSteps.classList.remove("hidden");
-    launchConfetti();
     els.nextSteps.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // Load the saved team (if any) and show its original combination.
+  async function restoreTeam() {
+    currentResult = null;
+    clearWheels();
+    const name = getTeamName();
+    if (name && !isTestMode()) {
+      try {
+        currentResult = await lookupTeam(name);
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+    renderTeamUI();
+    if (currentResult && !isTestMode()) renderLockedResult();
   }
 
   // ---------- Event wiring ----------
 
-  els.saveTeamBtn.addEventListener("click", () => {
+  els.saveTeamBtn.addEventListener("click", async () => {
     const name = els.teamNameInput.value.trim();
     if (!name) {
       els.teamNameInput.focus();
@@ -333,8 +385,9 @@
       setTimeout(() => els.teamNameInput.classList.remove("shake"), 500);
       return;
     }
-    localStorage.setItem(STORAGE_KEYS.team, name);
-    renderTeamUI();
+    if (!mode) return;
+    store(localStorage, STORAGE_KEYS.team, name);
+    await restoreTeam();
   });
 
   els.teamNameInput.addEventListener("keydown", (e) => {
@@ -355,26 +408,109 @@
   els.spinBtn.addEventListener("click", doSpin);
 
   els.resetBtn.addEventListener("click", () => {
-    const ok = confirm("Reset this device for a new team? This clears the current team's name and spin result on THIS phone only.");
-    if (!ok) return;
-    localStorage.removeItem(STORAGE_KEYS.team);
-    localStorage.removeItem(STORAGE_KEYS.result);
-    localStorage.removeItem(STORAGE_KEYS.locked);
+    const msg = mode === "server"
+      ? "Switch this device to a new team? Spins already made stay locked to their team."
+      : "Reset this device for a new team? This clears the current team's name on THIS phone only.";
+    if (!confirm(msg)) return;
+    store(localStorage, STORAGE_KEYS.team, null);
     els.teamNameInput.value = "";
-    els.productValue.textContent = "???";
-    els.buyerValue.textContent = "???";
-    els.twistValue.textContent = "???";
-    Object.values(wheelCards).forEach((c) => c.classList.remove("settled", "spinning"));
-    els.spinBtnLabel.textContent = "🎲 SPIN THE ROULETTE";
-    els.lockedNote.classList.add("hidden");
-    els.nextSteps.classList.add("hidden");
+    currentResult = null;
+    clearWheels();
     renderTeamUI();
+  });
+
+  // ---------- Host controls (open the page with ?host) ----------
+
+  function renderHostPanel(status) {
+    const unlocked = mode === "local" || !!getHostKey();
+    els.hostLogin.classList.toggle("hidden", unlocked);
+    els.hostTools.classList.toggle("hidden", !unlocked);
+    els.testModeBtn.textContent = isTestMode() ? "Exit test mode" : "Start test mode";
+    if (status !== undefined) els.hostStatus.textContent = status;
+  }
+
+  async function hostUnlock(key) {
+    store(sessionStorage, STORAGE_KEYS.hostKey, key);
+    try {
+      const r = await api("host/verify");
+      renderHostPanel(`Unlocked. ${r.teamCount} team(s) have spun.`);
+    } catch (e) {
+      store(sessionStorage, STORAGE_KEYS.hostKey, null);
+      renderHostPanel();
+      alert(e.message);
+    }
+  }
+
+  els.hostLoginBtn.addEventListener("click", () => {
+    const key = els.hostKeyInput.value.trim();
+    if (key) hostUnlock(key);
+  });
+
+  els.hostKeyInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") els.hostLoginBtn.click();
+  });
+
+  els.testModeBtn.addEventListener("click", async () => {
+    if (spinning) return;
+    store(sessionStorage, STORAGE_KEYS.testMode, isTestMode() ? null : "1");
+    renderModeBanner();
+    renderHostPanel();
+    await restoreTeam();
+  });
+
+  els.resetTeamBtn.addEventListener("click", async () => {
+    const name = els.resetTeamInput.value.trim();
+    if (!name) return;
+    if (!confirm(`Reset "${name}"? Their saved spin is deleted and they can spin again.`)) return;
+    try {
+      if (mode === "server") {
+        await api("host/reset-team", { method: "POST", body: JSON.stringify({ teamName: name }) });
+      } else {
+        const results = getLocalResults();
+        if (!results[teamKey(name)]) throw new Error(`No saved spin for "${name}" on this device.`);
+        delete results[teamKey(name)];
+        setLocalResults(results);
+      }
+      els.resetTeamInput.value = "";
+      renderHostPanel(`"${name}" was reset and can spin again.`);
+      if (getTeamName() && teamKey(getTeamName()) === teamKey(name)) await restoreTeam();
+    } catch (e) {
+      alert(e.message);
+    }
+  });
+
+  els.resetAllBtn.addEventListener("click", async () => {
+    if (!confirm("Delete EVERY team's saved spin? Everyone will be able to spin again.")) return;
+    if (prompt('Type RESET to confirm.') !== "RESET") return;
+    try {
+      if (mode === "server") {
+        const r = await api("host/reset-all", { method: "POST" });
+        renderHostPanel(`All teams reset (${r.removedCount} removed).`);
+      } else {
+        setLocalResults({});
+        renderHostPanel("All teams reset on this device.");
+      }
+      await restoreTeam();
+    } catch (e) {
+      alert(e.message);
+    }
   });
 
   // ---------- Init ----------
 
-  renderTeamUI();
-  if (isLocked()) {
-    renderLockedResult();
-  }
+  (async function init() {
+    renderTeamUI();
+    await detectMode();
+    renderModeBanner();
+    if (new URLSearchParams(location.search).has("host")) {
+      els.hostPanel.classList.remove("hidden");
+      renderHostPanel(mode === "local" ? "Device-only mode: resets and test spins affect this device only." : "");
+      if (mode === "server" && getHostKey()) hostUnlock(getHostKey());
+    } else if (isTestMode()) {
+      // Test mode only lives on the host page.
+      store(sessionStorage, STORAGE_KEYS.testMode, null);
+      renderModeBanner();
+    }
+    await restoreTeam();
+  })();
 })();

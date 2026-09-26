@@ -1,0 +1,12 @@
+{
+  "name": "gtm-roulette",
+  "private": true,
+  "description": "GTM Roulette: one spin per team, saved server-side.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/game.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
