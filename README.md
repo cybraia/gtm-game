@@ -13,7 +13,8 @@ leading/trailing spaces), so a team gets one spin across all devices.
 2. **Settings → Environment Variables:** add `HOST_KEY` (any secret you choose).
 3. Redeploy. `vercel.json` serves `public/`; `api/` holds the functions.
 
-If storage isn't connected, the page says so and spinning stays off.
+If the API or storage isn't reachable, the game still works but saves spins
+on each device only (the `/?host` panel says when this is happening).
 
 - **Players:** share the plain URL (e.g. as a QR code).
 - **Host:** open `/?host`, enter `HOST_KEY`. From there: test mode (spins aren't
@@ -23,7 +24,7 @@ If storage isn't connected, the page says so and spinning stays off.
 
 - `public/` — the page (static)
 - `api/` — Vercel functions, all backed by `lib/game.js`
-- `lib/decks.js` — decks, internal categories and matching (server-only)
+- `public/decks.js` — decks, internal categories (never shown in the UI) and matching
 - `lib/stores.js` — Redis (Upstash REST) and local JSON-file storage
 
 ## Run locally

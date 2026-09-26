@@ -28,12 +28,13 @@ if (!HOST_KEY) {
 const redis = redisFromEnv(process.env);
 const handle = createHandler({ store: redis || fileStore(DATA_FILE), hostKey: HOST_KEY });
 
-// Only these files are public. lib/ (decks + categories) and data/ are never served.
+// Only these files are public. lib/ and data/ are never served.
 const STATIC = {
   "/": ["index.html", "text/html; charset=utf-8"],
   "/index.html": ["index.html", "text/html; charset=utf-8"],
   "/styles.css": ["styles.css", "text/css; charset=utf-8"],
   "/script.js": ["script.js", "application/javascript; charset=utf-8"],
+  "/decks.js": ["decks.js", "application/javascript; charset=utf-8"],
 };
 
 const server = http.createServer((req, res) => {

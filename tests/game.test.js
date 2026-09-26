@@ -7,7 +7,7 @@ const path = require("path");
 
 const http = require("http");
 
-const decks = require("../lib/decks");
+const decks = require("../public/decks");
 const { createHandler } = require("../lib/game");
 const { redisStore, fileStore } = require("../lib/stores");
 
@@ -149,7 +149,7 @@ test("local server with file store: static files, team flow, persistence", async
 
   assert.strictEqual((await fetch(base + "/")).status, 200);
   assert.strictEqual((await fetch(base + "/script.js")).status, 200);
-  for (const p of ["/decks.js", "/lib/decks.js", "/server.js", "/data/teams.json", "/package.json", "/../lib/decks.js"]) {
+  for (const p of ["/lib/game.js", "/server.js", "/data/teams.json", "/package.json", "/../server.js"]) {
     assert.strictEqual((await fetch(base + p)).status, 404, p);
   }
   await teamFlow(base, "host-secret");
