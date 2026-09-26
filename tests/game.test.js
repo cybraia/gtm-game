@@ -9,7 +9,7 @@ const http = require("http");
 
 const decks = require("../public/decks");
 const { createHandler } = require("../lib/game");
-const { redisStore, fileStore } = require("../lib/stores");
+const { redisStore, fileStore, redisFromEnv } = require("../lib/stores");
 
 test("decks have the expected sizes and every product has a compatible buyer", () => {
   assert.strictEqual(decks.PRODUCTS.length, 32);
@@ -215,4 +215,10 @@ test("file store keeps data across restarts", async () => {
   const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "gtm-")), "t.json");
   await fileStore(file).claim("a", { teamName: "A" });
   assert.deepStrictEqual(await fileStore(file).get("a"), { teamName: "A" });
+});
+
+test("KV env vars are found with a custom prefix", () => {
+  assert.ok(redisFromEnv({ SSERVER_KV_REST_API_URL: "https://x", SSERVER_KV_REST_API_TOKEN: "t", SSERVER_KV_REST_API_READ_ONLY_TOKEN: "ro" }));
+  assert.ok(redisFromEnv({ KV_REST_API_URL: "https://x", KV_REST_API_TOKEN: "t" }));
+  assert.strictEqual(redisFromEnv({ SSERVER_KV_REST_API_URL: "https://x" }), null);
 });
