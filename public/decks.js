@@ -1,10 +1,9 @@
 /*
  * GTM Roulette content decks + matching logic.
  *
- * Categories are INTERNAL metadata. They are never rendered in the UI.
- * The Node server (server.js) requires this file and does not serve it to
- * browsers; it is only loaded client-side in device-only fallback mode when
- * no game server is reachable (e.g. plain static hosting).
+ * Categories are INTERNAL metadata and are never rendered in the UI. Used by
+ * the API (lib/game.js) and, when the game server isn't reachable, by the page
+ * itself so spinning still works (saved on that device only).
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();

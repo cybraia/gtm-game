@@ -5,7 +5,11 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
-const decks = require("../decks");
+const http = require("http");
+
+const decks = require("../public/decks");
+const { createHandler } = require("../lib/game");
+const { redisStore, fileStore } = require("../lib/stores");
 
 test("decks have the expected sizes and every product has a compatible buyer", () => {
   assert.strictEqual(decks.PRODUCTS.length, 32);
@@ -43,16 +47,8 @@ test("public decks never carry categories", () => {
   }
 });
 
-test("server: registration, duplicates, returning teams, test mode, host reset", async (t) => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "gtm-"));
-  process.env.DATA_FILE = path.join(dir, "teams.json");
-  process.env.HOST_KEY = "host-secret";
-  delete require.cache[require.resolve("../server")];
-  const { server } = require("../server");
-  await new Promise((r) => server.listen(0, r));
-  t.after(() => server.close());
-  const base = `http://127.0.0.1:${server.address().port}`;
-
+// Runs the full team/host flow against a base URL.
+async function teamFlow(base, hostKey) {
   const call = async (p, body, key) => {
     const headers = { "Content-Type": "application/json" };
     if (key) headers["X-Host-Key"] = key;
@@ -60,13 +56,9 @@ test("server: registration, duplicates, returning teams, test mode, host reset",
     return { status: res.status, body: await res.json().catch(() => null) };
   };
 
-  // Static files served; internals are not.
-  assert.strictEqual((await fetch(base + "/")).status, 200);
-  assert.strictEqual((await fetch(base + "/script.js")).status, 200);
-  for (const p of ["/decks.js", "/server.js", "/data/teams.json", "/package.json", "/../decks.js"]) {
-    assert.strictEqual((await fetch(base + p)).status, 404, p);
-  }
-  assert.ok(!JSON.stringify((await call("/api/decks")).body).includes('"cats"'));
+  const d = (await call("/api/decks")).body;
+  assert.strictEqual(d.ready, true);
+  assert.ok(!JSON.stringify(d).includes('"cats"'));
 
   // Team name required.
   assert.strictEqual((await call("/api/spin", { teamName: "   " })).status, 400);
@@ -85,28 +77,142 @@ test("server: registration, duplicates, returning teams, test mode, host reset",
   assert.deepStrictEqual(lookup.body, { spun: true, result: first.body.result });
   assert.deepStrictEqual((await call("/api/team?name=Nobody")).body, { spun: false });
 
-  // Persisted to disk.
-  assert.ok(JSON.parse(fs.readFileSync(process.env.DATA_FILE, "utf8"))["chaos coalition"]);
+  // Simultaneous spins from different devices all get the same saved combination.
+  const racers = await Promise.all([1, 2, 3, 4, 5].map(() => call("/api/spin", { teamName: "Race Team" })));
+  assert.strictEqual(racers.filter((r) => !r.body.alreadySpun).length, 1);
+  for (const r of racers) assert.deepStrictEqual(r.body.result, racers[0].body.result);
 
   // Test spins need the host key and never consume entries.
   assert.strictEqual((await call("/api/spin", { test: true })).status, 403);
   assert.strictEqual((await call("/api/spin", { test: true }, "wrong")).status, 403);
   for (let i = 0; i < 5; i++) {
-    const r = await call("/api/spin", { test: true, teamName: "Test Team" }, "host-secret");
+    const r = await call("/api/spin", { test: true, teamName: "Test Team" }, hostKey);
     assert.strictEqual(r.body.test, true);
   }
   assert.deepStrictEqual((await call("/api/team?name=Test%20Team")).body, { spun: false });
-  assert.strictEqual((await call("/api/host/verify", undefined, "host-secret")).body.teamCount, 1);
+  assert.strictEqual((await call("/api/host/verify", undefined, hostKey)).body.teamCount, 2);
 
   // Host reset flow.
   assert.strictEqual((await call("/api/host/reset-team", { teamName: "chaos coalition" })).status, 403);
-  assert.strictEqual((await call("/api/host/reset-team", { teamName: "CHAOS COALITION " }, "host-secret")).status, 200);
+  assert.strictEqual((await call("/api/host/reset-team", { teamName: "CHAOS COALITION " }, hostKey)).status, 200);
   assert.deepStrictEqual((await call("/api/team?name=Chaos%20Coalition")).body, { spun: false });
-  assert.strictEqual((await call("/api/host/reset-team", { teamName: "Chaos Coalition" }, "host-secret")).status, 404);
+  assert.strictEqual((await call("/api/host/reset-team", { teamName: "Chaos Coalition" }, hostKey)).status, 404);
   const respin = await call("/api/spin", { teamName: "Chaos Coalition" });
   assert.strictEqual(respin.body.alreadySpun, false);
-  await call("/api/spin", { teamName: "Team Two" });
-  const all = await call("/api/host/reset-all", {}, "host-secret");
+  const all = await call("/api/host/reset-all", {}, hostKey);
   assert.strictEqual(all.body.removedCount, 2);
-  assert.strictEqual((await call("/api/host/verify", undefined, "host-secret")).body.teamCount, 0);
+  assert.strictEqual((await call("/api/host/verify", undefined, hostKey)).body.teamCount, 0);
+}
+
+function listen(server) {
+  return new Promise((r) => server.listen(0, "127.0.0.1", () => r(`http://127.0.0.1:${server.address().port}`)));
+}
+
+// Minimal fake of the Upstash REST API (the commands lib/stores.js uses).
+function fakeUpstash(token) {
+  const hashes = new Map();
+  const calls = [];
+  const server = http.createServer((req, res) => {
+    let data = "";
+    req.on("data", (c) => (data += c));
+    req.on("end", () => {
+      if (req.headers.authorization !== `Bearer ${token}`) {
+        res.writeHead(401);
+        return res.end(JSON.stringify({ error: "Unauthorized" }));
+      }
+      const [cmd, key, field, value] = JSON.parse(data);
+      calls.push(cmd);
+      const h = hashes.get(key) || new Map();
+      hashes.set(key, h);
+      let result;
+      if (cmd === "HGET") result = h.has(field) ? h.get(field) : null;
+      else if (cmd === "HSETNX") result = h.has(field) ? 0 : (h.set(field, value), 1);
+      else if (cmd === "HDEL") result = h.delete(field) ? 1 : 0;
+      else if (cmd === "HLEN") result = h.size;
+      else if (cmd === "DEL") result = hashes.delete(key) ? 1 : 0;
+      else return res.end(JSON.stringify({ error: "unknown command " + cmd }));
+      res.end(JSON.stringify({ result }));
+    });
+  });
+  return { server, calls };
+}
+
+test("local server with file store: static files, team flow, persistence", async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "gtm-"));
+  process.env.DATA_FILE = path.join(dir, "teams.json");
+  process.env.HOST_KEY = "host-secret";
+  delete process.env.KV_REST_API_URL;
+  delete require.cache[require.resolve("../server")];
+  const { server } = require("../server");
+  const base = await listen(server);
+  t.after(() => server.close());
+
+  assert.strictEqual((await fetch(base + "/")).status, 200);
+  assert.strictEqual((await fetch(base + "/script.js")).status, 200);
+  for (const p of ["/lib/game.js", "/server.js", "/data/teams.json", "/package.json", "/../server.js"]) {
+    assert.strictEqual((await fetch(base + p)).status, 404, p);
+  }
+  await teamFlow(base, "host-secret");
+  assert.deepStrictEqual(JSON.parse(fs.readFileSync(process.env.DATA_FILE, "utf8")), {});
+});
+
+test("Vercel functions with KV (Upstash REST) store", async (t) => {
+  const kv = fakeUpstash("kv-token");
+  const kvUrl = await listen(kv.server);
+  t.after(() => kv.server.close());
+
+  // Load the real api/ entry points with Vercel's env vars.
+  process.env.KV_REST_API_URL = kvUrl;
+  process.env.KV_REST_API_TOKEN = "kv-token";
+  process.env.HOST_KEY = "vercel-host";
+  for (const k of Object.keys(require.cache)) if (k.includes(`${path.sep}api${path.sep}`) || k.endsWith("vercel.js")) delete require.cache[k];
+  const root = path.join(__dirname, "..");
+  const fns = {};
+  for (const f of ["decks", "team", "spin", "host/verify", "host/reset-team", "host/reset-all"]) fns[f] = require(path.join(root, "api", f + ".js"));
+
+  // Route like Vercel does (file per path) and pre-parse the JSON body like Vercel's helpers.
+  const vercel = http.createServer(async (req, res) => {
+    const route = new URL(req.url, "http://x").pathname.replace(/^\/api\//, "");
+    if (!fns[route]) {
+      res.writeHead(404);
+      return res.end();
+    }
+    let data = "";
+    for await (const c of req) data += c;
+    req.body = data ? JSON.parse(data) : undefined;
+    fns[route](req, res);
+  });
+  const base = await listen(vercel);
+  t.after(() => vercel.close());
+
+  await teamFlow(base, "vercel-host");
+  assert.ok(kv.calls.includes("HSETNX"));
+});
+
+test("without storage configured: decks load, spins refused, host test mode still works", async (t) => {
+  const handle = createHandler({ store: null, hostKey: "k" });
+  const server = http.createServer((req, res) => handle(req, res, new URL(req.url, "http://x").pathname.slice(5)));
+  const base = await listen(server);
+  t.after(() => server.close());
+  const post = (p, body, key) =>
+    fetch(base + p, { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, key ? { "X-Host-Key": key } : {}), body: JSON.stringify(body) });
+
+  assert.strictEqual((await (await fetch(base + "/api/decks")).json()).ready, false);
+  assert.strictEqual((await post("/api/spin", { teamName: "A" })).status, 503);
+  assert.strictEqual((await fetch(base + "/api/team?name=A")).status, 503);
+  assert.strictEqual((await (await fetch(base + "/api/host/verify", { headers: { "X-Host-Key": "k" } })).json()).teamCount, null);
+  assert.strictEqual((await post("/api/spin", { test: true }, "k")).status, 200);
+});
+
+test("Redis store surfaces auth errors instead of pretending to save", async (t) => {
+  const kv = fakeUpstash("right");
+  const url = await listen(kv.server);
+  t.after(() => kv.server.close());
+  await assert.rejects(redisStore(url, "wrong").claim("x", { teamName: "x" }), /HSETNX failed/);
+});
+
+test("file store keeps data across restarts", async () => {
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "gtm-")), "t.json");
+  await fileStore(file).claim("a", { teamName: "A" });
+  assert.deepStrictEqual(await fileStore(file).get("a"), { teamName: "A" });
 });

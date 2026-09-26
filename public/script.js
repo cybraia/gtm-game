@@ -9,17 +9,17 @@
   let BUYERS = [];
   let TWISTS = [];
 
-  // "server": spins are made and saved by server.js (one spin per team, any device).
-  // "local":  no game server reachable (static hosting). Spins are saved on this
-  //           device only, and the page says so.
+  // "server": spins are made and saved server-side (one spin per team, any device).
+  // "local":  the game server or its storage isn't reachable, so spins are made
+  //           in the page and saved on this device only.
   let mode = null;
   let localDecks = null;
 
   const STORAGE_KEYS = {
     team: "gtmRoulette_teamName",
-    localResults: "gtmRoulette_localResults",
     hostKey: "gtmRoulette_hostKey",
     testMode: "gtmRoulette_testMode",
+    localResults: "gtmRoulette_localResults",
   };
 
   const els = {
@@ -84,7 +84,7 @@
     return load(localStorage, STORAGE_KEYS.team) || "";
   }
 
-  // The current team's saved result (from the server, or this device in local mode).
+  // The current team's saved result, from the server.
   let currentResult = null;
 
   function isLocked() {
@@ -99,7 +99,7 @@
     return load(sessionStorage, STORAGE_KEYS.testMode) === "1";
   }
 
-  // ---------- Server / local backends ----------
+  // ---------- Server API ----------
 
   async function api(path, options) {
     const opts = Object.assign({ headers: {} }, options);
@@ -140,11 +140,15 @@
   async function detectMode() {
     try {
       const d = await api("decks");
-      PRODUCTS = d.products;
-      BUYERS = d.buyers;
-      TWISTS = d.twists;
-      mode = "server";
-    } catch (e) {
+      if (d.ready) {
+        PRODUCTS = d.products;
+        BUYERS = d.buyers;
+        TWISTS = d.twists;
+        mode = "server";
+        return;
+      }
+    } catch (e) {}
+    try {
       await loadScript("decks.js");
       localDecks = window.GTM_DECKS;
       const d = localDecks.publicDecks();
@@ -152,7 +156,7 @@
       BUYERS = d.buyers;
       TWISTS = d.twists;
       mode = "local";
-    }
+    } catch (e) {}
   }
 
   async function lookupTeam(name) {
@@ -185,9 +189,6 @@
     if (isTestMode()) {
       els.modeBanner.textContent = "🧪 HOST TEST MODE — spins are not saved and don't use up any team's spin.";
       els.modeBanner.classList.add("test");
-      els.modeBanner.classList.remove("hidden");
-    } else if (mode === "local") {
-      els.modeBanner.textContent = "⚠ Game server not connected. Spins are saved on this device only, so one spin per team can't be enforced across devices.";
       els.modeBanner.classList.remove("hidden");
     } else {
       els.modeBanner.classList.add("hidden");
@@ -364,7 +365,7 @@
     currentResult = null;
     clearWheels();
     const name = getTeamName();
-    if (name && !isTestMode()) {
+    if (name && mode && !isTestMode()) {
       try {
         currentResult = await lookupTeam(name);
       } catch (e) {
@@ -408,10 +409,7 @@
   els.spinBtn.addEventListener("click", doSpin);
 
   els.resetBtn.addEventListener("click", () => {
-    const msg = mode === "server"
-      ? "Switch this device to a new team? Spins already made stay locked to their team."
-      : "Reset this device for a new team? This clears the current team's name on THIS phone only.";
-    if (!confirm(msg)) return;
+    if (!confirm("Switch this device to a new team? Spins already made stay locked to their team.")) return;
     store(localStorage, STORAGE_KEYS.team, null);
     els.teamNameInput.value = "";
     currentResult = null;
@@ -433,7 +431,7 @@
     store(sessionStorage, STORAGE_KEYS.hostKey, key);
     try {
       const r = await api("host/verify");
-      renderHostPanel(`Unlocked. ${r.teamCount} team(s) have spun.`);
+      renderHostPanel(r.teamCount === null ? "Unlocked. Storage isn't connected yet — only test mode works." : `Unlocked. ${r.teamCount} team(s) have spun.`);
     } catch (e) {
       store(sessionStorage, STORAGE_KEYS.hostKey, null);
       renderHostPanel();
@@ -504,7 +502,8 @@
     renderModeBanner();
     if (new URLSearchParams(location.search).has("host")) {
       els.hostPanel.classList.remove("hidden");
-      renderHostPanel(mode === "local" ? "Device-only mode: resets and test spins affect this device only." : "");
+      // Host panel only: say which storage is in use.
+      renderHostPanel(mode === "local" ? "Game server/storage not connected: spins are saved on each device only." : "");
       if (mode === "server" && getHostKey()) hostUnlock(getHostKey());
     } else if (isTestMode()) {
       // Test mode only lives on the host page.
